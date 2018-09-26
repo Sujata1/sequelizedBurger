@@ -1,6 +1,9 @@
 <tr class="table-row">
-    <td class="table-first-col">{{id}}. {{burger_name}}</td>
-    <td><input  class="customer" name="customerName" type=text placeholder="Customer?"></td>
-    <td><button class="btn-devourit" data-burgerid={{id}}>Devour it!</button></td>
    
+   <form action="/{{id}}"  method="POST">
+    <td class="table-first-col">{{id}}. {{burger_name}}</td>
+    <td><input  class="customer" name="customerName" type="text" placeholder="Customer?"></td>
+    {{!-- <td><button class="btn-devourit" >Devour it!</button></td> --}}
+    <td><button class="btn-devourit" data-burgerid={{id}}>Devour it!</button></td> 
+      </form>
 </tr>

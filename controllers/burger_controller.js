@@ -3,7 +3,7 @@ var db = require("../models");
 module.exports = function (app) {
 
   app.get("/", function (req, res) {
-    db.Burger.findAll({}).then(function (dbBurger) {
+    db.Burger.findAll({ where: {}, include: [{ model: db.Customer }] }).then(function (dbBurger) {
       var burgerObject = {
         burgers: dbBurger
       };
@@ -11,63 +11,39 @@ module.exports = function (app) {
     });
   });
 
-  app.put("/api/burgers/:id", function (req, res) {
-    console.log("customername:" + req.body.customername);
-    var customerName = req.body.customername;
-    ////
-    db.Customer.findOne({
-      where: {
-        customer_name: customerName
-      }
-    }).then(function (dbCustomer) {
-      ////
-
+  app.post("/:id", function (req, res) {
+    var burger_id = req.params.id;
+    var customerName = req.body.customerName;
+    var resVar = res;
+    db.Customer.findOne({ where: { customer_name: customerName } }).then(function (dbCustomer) {
       if (dbCustomer !== null) {
         var customerid = dbCustomer.id;
-
-        db.Burger.update({
-          devoured: true,
-          CustomerId: customerid
-        }, {
-            where: {
-              id: req.params.id
-            }
-          })
-          .then(function (result) {
-            console.log("result: " + result);
-            if (result.changedRows === 0) {
-              return res.status(404).end();
-            }
-            res.status(200).end();
-          });
-      } else {
+        burgerUpdate(customerid, burger_id, resVar);
+      }
+      else {
         db.Customer.create({
           customer_name: customerName
         }).then(function (dbCustomer) {
-          if (dbCustomer !== null) {
-            var customerid = dbCustomer.id;
-
-            db.Burger.update({
-              devoured: true,
-              CustomerId: customerid
-            }, {
-                where: {
-                  id: req.params.id
-                }
-              })
-              .then(function (result) {
-                console.log("result: " + result);
-                if (result.changedRows === 0) {
-                  return res.status(404).end();
-                }
-                res.status(200).end();
-              });
-          }
+          var customerid = dbCustomer.id;
+          burgerUpdate(customerid, burger_id, resVar);
         });
-      }
+      };
     });
   });
 
+  function burgerUpdate(customerid, burgerId, resVar) {
+    db.Burger.update({
+      devoured: true,
+      CustomerId: customerid
+    }, {
+        where: {
+          id: burgerId
+        }
+      })
+      .then(function (result) {
+        resVar.redirect("/");
+      });
+  };
 
   app.post("/api/burgers", function (req, res) {
     db.Burger.create({
@@ -77,7 +53,6 @@ module.exports = function (app) {
     });
   });
 
-
   app.delete("/api/burgers", function (req, res) {
     db.Burger.destroy({
       where: {},
@@ -86,5 +61,5 @@ module.exports = function (app) {
       res.end();
     });
   });
-  
+
 };
